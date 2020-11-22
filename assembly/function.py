@@ -1,13 +1,10 @@
 import llvmlite.binding as llvm
-from networkx.drawing import nx_agraph
 import pygraphviz
-from .basicblock import Block
 import random
-from collections import deque
-import pdb
-# pdb.set_trace()
-import sys
 
+from networkx.drawing import nx_agraph
+from .basicblock import Block
+from collections import deque
 class Function:
   # vector_representation
   # execution_sequences
@@ -17,27 +14,25 @@ class Function:
     self.edges = []
 
     cfg = llvm.get_function_cfg(func, show_inst=True)
-    print(cfg)
     self.graph = nx_agraph.from_agraph(pygraphviz.AGraph(cfg))
 
     for block in self.graph.nodes(data = True):
       self.blocks[block[0]] = Block(block, list(self.graph.edges(block[0])))
       self.edges += list(self.graph.edges(block[0]))
-      # print(self.blocks[block[0]].block_contents)
 
     self.execution_paths = self.generate_execution_paths()
-    self.generate_execution_traces()
-
-
 
   # generates execution traces (i.e. with with actual instructions) from execution paths
   def generate_execution_traces(self):
     traces = []
+
     for path in self.execution_paths:
       trace = []
       for node in path:
         trace += self.blocks[node].block_contents
       traces.append(trace)
+    
+    return traces
 
   def generate_execution_paths(self):
     paths = []

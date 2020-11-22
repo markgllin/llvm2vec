@@ -2,6 +2,7 @@
 import llvmlite.binding as llvm
 
 from assembly.function import Function
+from llvmir.normalizer import Normalizer
 
 llvm.initialize()
 llvm.initialize_native_target()
@@ -16,25 +17,15 @@ functions = moduleref.functions
 
 asm_functions = []
 for func in functions:
+  llvm_function = Function(func)
+  asm_functions.append(llvm_function)
+
+  traces = llvm_function.generate_execution_traces()
+  llvm_parser = Normalizer()
+  for trace in traces:
+    normalized = llvm_parser.normalize(trace)
+    print(normalized)
 
 
-  asm_functions.append(Function(func))
-  # for u, v, keys, weight in graph.edges(data="weight", keys=True):
-  #   print(weight)
-  # print(type(graph).__name__)
-  # blocks = function.blocks
-  # for block in blocks:
-  #   insts = block.instructions
-  #   for inst in insts:
-  #     print()d
-  #     print("========")
-  #     print("inst:" + str(inst))
-  #     print("opcode:" + str(inst.opcode))
-  #     print()
-  #     operands = inst.operands
-  #     for operand in operands:
-  #       print("operand:" + str(operand))
-  #       print("also inst:" + str(operand.is_instruction))
-  #       attrs = operand.attributes
-  #       for attr in attrs:
-  #         print("\tattr:" + str(attr))
+
+  

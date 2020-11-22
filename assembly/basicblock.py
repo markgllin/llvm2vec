@@ -1,8 +1,6 @@
 import llvmlite.binding as llvm
 from networkx.drawing import nx_agraph
 import pygraphviz
-import sys
-
 class Block:
 
   def __init__(self, block, edges):
