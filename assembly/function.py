@@ -21,6 +21,25 @@ class Function:
       self.edges += list(self.graph.edges(block[0]))
 
     self.execution_paths = self.generate_execution_paths()
+    self.instr_freq_map = self.generate_instr_freq_map()
+
+  def generate_instr_freq_map(self):
+    freq_map = {}
+    func_ops = []
+
+    for block_name in self.blocks:
+      for instr in self.blocks[block_name].block_contents:
+        block_ops = instr.split()
+        func_ops += block_ops
+    
+    for op in func_ops:
+      if op in freq_map:
+        freq_map[op] += 1 
+      else:
+        freq_map[op]=1
+    
+    return freq_map
+
 
   # generates execution traces (i.e. with with actual instructions) from execution paths
   def generate_execution_traces(self):

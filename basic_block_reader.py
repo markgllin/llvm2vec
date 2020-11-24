@@ -1,8 +1,7 @@
 
 import llvmlite.binding as llvm
-
+from llvmir.llvm2vec import LLVM2Vec
 from assembly.function import Function
-from llvmir.normalizer import Normalizer
 
 llvm.initialize()
 llvm.initialize_native_target()
@@ -15,17 +14,15 @@ llvm_ir = data
 moduleref= llvm.parse_bitcode(llvm_ir)
 functions = moduleref.functions
 
-asm_functions = []
+# LLVM2Vec.process(functions)
+
+llvm_functions = []
+
 for func in functions:
-  llvm_function = Function(func)
-  asm_functions.append(llvm_function)
+  llvm_functions.append(Function(func))
 
-  traces = llvm_function.generate_execution_traces()
-  llvm_parser = Normalizer()
-  for trace in traces:
-    normalized = llvm_parser.normalize(trace)
-    print(normalized)
-
+# LLVM2Vec.generate_frequency_map(llvm_functions)
+  # asm_functions.append(llvm_function)
 
 
   

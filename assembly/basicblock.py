@@ -1,7 +1,7 @@
-import llvmlite.binding as llvm
-from networkx.drawing import nx_agraph
-import pygraphviz
+from llvmir.normalizer import Normalizer
 class Block:
+
+  normalizer = Normalizer()
 
   def __init__(self, block, edges):
     self.block = block
@@ -17,7 +17,6 @@ class Block:
       else:
         self.block_contents.append(line)
 
-
     # remove closing brace from list
     if self.block_contents[-1] == '}':
       del self.block_contents[-1]
@@ -32,3 +31,5 @@ class Block:
     # remove opening label from list
     if self.block_contents[-1] == '}':
       del self.block_contents[-1]
+
+    self.block_contents = self.normalizer.normalize(self.block_contents)
