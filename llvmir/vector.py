@@ -4,11 +4,15 @@ from numpy import random as rand
 
 class Vector:
 
-  def __init__(self, token, dimension, populate=True):
-    self.token = token
+  DIMENSION = 100
 
-    if populate:
-      self.neu = rand.uniform(low=0.01, high=0.5, size=dimension)
-    else:
-      self.neu = [0] * dimension
+  def __init__(self, token):
+    self.token = token
+    self.neuIn = self.neuIn()
+    self.neuOut = self.neuOut()
   
+  def neuIn(self):
+    return rand.uniform(low=0.01, high=0.5, size=self.DIMENSION)
+
+  def neuOut(self):
+    return [0] * self.DIMENSION
