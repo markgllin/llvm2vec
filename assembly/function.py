@@ -6,14 +6,13 @@ import uuid
 from networkx.drawing import nx_agraph
 from .basicblock import Block
 from collections import deque
-from llvmir.vector import Vector
+from llvmir.function_vector import FunctionVector
+
 class Function:
-  # vector_representation
-  # execution_sequences
 
   def __init__(self, func):
     self.id = uuid.uuid4()
-    self.vector = Vector(self.id)
+    self.vector = FunctionVector(self.id)
     self.blocks = {}
     self.edges = []
 
