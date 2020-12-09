@@ -1,18 +1,24 @@
+from llvmir.function_cfg import FunctionCFG
+from asm2vec.asm import Function
+from asm2vec.model import Asm2Vec
+import llvmlite.binding as llvm
+import logging
 
-from assembly.binary import Binary
-from llvmir.llvm2vec import LLVM2Vec
+logging.basicConfig(level=logging.DEBUG)
 
-f = open("llvm_binary_example/hello.bc", "rb")
+f = open("llvm_binary_example/app_rand.c.bc", "rb")
 data=f.read()
 f.close()
 
-llvm_binary = Binary(data)
+moduleref= llvm.parse_bitcode(data)
 
-print(llvm_binary.functions[0].generate_execution_traces())
-un_id = llvm_binary.instr_vectors['un_id'].neuIn
-label = llvm_binary.instr_vectors['label'].neuIn
+repo = []
+for raw_func in moduleref.functions:
+  cfg_func = FunctionCFG(raw_func)
+  
+  if cfg_func.blocks:
+    repo.append(Function(cfg_func.root(), cfg_func.id))
 
-concatted_word_vecs = LLVM2Vec.concat_vectors([un_id, label])
-func_vec = llvm_binary.functions[0].vector.neuIn
-print(LLVM2Vec.average_vectors([concatted_word_vecs, func_vec]))
-# print(llvm_binary.functions[0].vector.neuIn)
+model = Asm2Vec(d=200)
+train_repo = model.make_function_repo(repo)
+model.train(train_repo)
