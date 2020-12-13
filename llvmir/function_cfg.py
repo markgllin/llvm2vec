@@ -12,7 +12,7 @@ class FunctionCFG:
   normalizer = Normalizer()
 
   def __init__(self, func):
-    self.id = uuid.uuid4()
+    self.id = str(uuid.uuid4())
     self.blocks = defaultdict(lambda: BasicBlock())
 
     cfg = llvm.get_function_cfg(func, show_inst=True)
