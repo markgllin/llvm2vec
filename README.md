@@ -41,7 +41,7 @@ python3 main.py
 Lots of things:
 - improve TSNE plotting (i.e. add labels/colors etc.)
 - database to persist vectorized functions
-- determining function similarity via cosine similarity
+- ~~determining function similarity via cosine similarity~~
 - proper pipeline for disassembling in LLVM IR w/ retdec and passing into llvm2vec (probably in a new repo)
 
 Nice to haves:

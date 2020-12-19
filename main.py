@@ -51,6 +51,14 @@ function_vectors = []
 for function in functions:
   function_vectors.append(model2.to_vec(function))
 
+func1 = function_vectors[0]
+func2 = function_vectors[1]
+distance = model2.cosine_distance(func1, func2)
+similarity = model2.cosine_similarity(func1, func2)
+print(distance)
+print(similarity)
+exit()
+
 tsne = TSNE(n_components=3, random_state=0)
 function_vectors_2d = tsne.fit_transform(function_vectors)
 print(function_vectors_2d)
