@@ -17,7 +17,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 logging.basicConfig(level=logging.DEBUG)
 
-f = open("llvm_binary_example/app_rand.c.bc", "rb")
+f = open("llvm_binary_example/busybox-O0.bc", "rb")
 data=f.read()
 f.close()
 
@@ -31,11 +31,13 @@ for raw_func in moduleref.functions:
     functions.append(Function(cfg_func.root(), cfg_func.id))
 
 # train model 
+print("Training model...")
 model = Asm2Vec(d=3)
 train_repo = model.make_function_repo(functions)
 model.train(train_repo)
 
 # and save memento to disk
+print("Saving memento to disk...")
 serialized = model.memento().save_to_disk()
 # model.save_function_repo_to_disk()
 
@@ -48,17 +50,20 @@ model2.set_memento(memento)
 
 
 function_vectors = []
+print("Generating function vectors...")
 for function in functions:
   function_vectors.append(model2.to_vec(function))
 
-func1 = function_vectors[0]
-func2 = function_vectors[1]
-distance = model2.cosine_distance(func1, func2)
-similarity = model2.cosine_similarity(func1, func2)
-print(distance)
-print(similarity)
-exit()
+# func1 = function_vectors[0]
+# func2 = function_vectors[1]
+# distance = model2.cosine_distance(func1, func2)
+# similarity = model2.cosine_similarity(func1, func2)
+# print(distance)
+# print(similarity)
+# exit()
 
+
+print("Generating TSNE plot...")
 tsne = TSNE(n_components=3, random_state=0)
 function_vectors_2d = tsne.fit_transform(function_vectors)
 print(function_vectors_2d)
@@ -67,15 +72,15 @@ df_subset = {}
 df_subset['tsne-2d-one'] = function_vectors_2d[:,0]
 df_subset['tsne-2d-two'] = function_vectors_2d[:,1]
 print(df_subset)
-# plt.figure(figsize=(16,10))
-# sns.scatterplot(
-#     x="tsne-2d-one", y="tsne-2d-two",
-#     # hue="y",
-#     palette=sns.color_palette("hls", 10),
-#     data=df_subset,
-#     legend="full",
-#     alpha=0.3
-# )
-# plt.savefig('foo2.png')
+plt.figure(figsize=(16,10))
+sns.scatterplot(
+    x="tsne-2d-one", y="tsne-2d-two",
+    # hue="y",
+    palette=sns.color_palette("hls", 10),
+    data=df_subset,
+    legend="full",
+    alpha=0.3
+)
+plt.savefig('foo2.png')
 
 
