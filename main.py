@@ -21,6 +21,7 @@ f = open("llvm_binary_example/busybox-O0.bc", "rb")
 data=f.read()
 f.close()
 
+print("Parsing bitcode...")
 moduleref= llvm.parse_bitcode(data)
 
 functions = []
