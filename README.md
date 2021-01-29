@@ -37,6 +37,12 @@ export PYTHONPATH=$PWD/asm2vec:$PYTHONPATH
 python3 main.py
 ```
 
+# Usage
+```
+python3 main.pu
+python3 -m tensorboard.main --logdir=/home/projections/ --bind_all
+```
+
 # To Do
 Lots of things:
 - improve TSNE plotting (i.e. add labels/colors etc.)
