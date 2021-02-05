@@ -39,13 +39,13 @@ python3 main.py
 
 # Usage
 ```
-python3 main.pu
+python3 main.py
 python3 -m tensorboard.main --logdir=/home/projections/ --bind_all
 ```
 
 # To Do
 Lots of things:
-- improve TSNE plotting (i.e. add labels/colors etc.)
+- ~~improve TSNE plotting (i.e. add labels/colors etc.)~~
 - database to persist vectorized functions
 - ~~determining function similarity via cosine similarity~~
 - proper pipeline for disassembling in LLVM IR w/ retdec and passing into llvm2vec (probably in a new repo)

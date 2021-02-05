@@ -3,4 +3,5 @@
 **/memento.txt
 **/model.txt
 **/llvm_binary_example
-projections
+projections/*
+cfgs/**

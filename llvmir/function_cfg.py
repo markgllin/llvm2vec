@@ -1,23 +1,27 @@
 import llvmlite.binding as llvm
 import pygraphviz
-import uuid
+import pydot
+import re
 
 from networkx.drawing import nx_agraph
 from collections import defaultdict
 from .normalizer import Normalizer
 from asm2vec.asm import BasicBlock, parse_instruction
-
+import pdb
 class FunctionCFG:
 
   normalizer = Normalizer()
 
-  def __init__(self, func):
-    self.id = str(uuid.uuid4())
+  def __init__(self, func, filename):
     self.blocks = defaultdict(lambda: BasicBlock())
 
     cfg = llvm.get_function_cfg(func, show_inst=True)
     self.graph = nx_agraph.from_agraph(pygraphviz.AGraph(cfg))
 
+    (self.dot_graph,) = pydot.graph_from_dot_data(cfg)
+    self.id = re.search("CFG for \'(.+?)\' function", self.dot_graph.get_label()).group(1) + '_' + filename
+    self.generate_pngs()
+    
     for block in self.graph.nodes(data = True):
       successors = self.get_block_successors(block[0])
 
@@ -31,6 +35,9 @@ class FunctionCFG:
 
   def root(self):
     return self.blocks[next(iter(self.blocks))] if self.blocks else None
+
+  def generate_pngs(self):
+    self.dot_graph.write_png('cfgs/'+ self.id + '.png')
 
   def get_block_successors(self, block):
     # edge[0] = start node, edge[1] = destination node

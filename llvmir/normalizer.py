@@ -12,6 +12,11 @@ class Normalizer:
       'sub': '',
       'llvm_type': 'comment'
     },
+    {
+      'regex': r".*=",
+      'sub': 'result',
+      'llvm_type': 'result'
+    }
     # {
     #   'regex': r"[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*\(.*\)",
     #   'sub': 'func',
@@ -63,7 +68,7 @@ class Normalizer:
     #   'llvm_type': 'label'
     # },
     {
-    'regex': r"({|}|=|,|\(|\)|\[|\])",
+    'regex': r"({|}|,|\(|\)|\[|\])",
     'sub': '',
     'llvm_type': 'chars'
     },
