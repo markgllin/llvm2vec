@@ -37,11 +37,6 @@ class Normalizer:
       'sub': 'un_id',
       'llvm_type': 'unnamed_identifier'
     },
-    # {
-    #   'regex': r"i[0-9]+",
-    #   'sub': 'int',
-    #   'llvm_type': 'integer'
-    # },
     {
       'regex': r"[-a-zA-Z0-9]+\*+",
       'sub': 'ptr',
