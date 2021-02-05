@@ -1,9 +1,0 @@
-Function	Filename	role
-adler32_z_adler32.o.bc	adler32.o.bc	source
-adler32_adler32.o.bc	adler32.o.bc	source
-adler32_combine_adler32.o.bc	adler32.o.bc	source
-adler32_combine64_adler32.o.bc	adler32.o.bc	source
-function_0_adler32.o.bc	adler32.o.bc	query
-function_30c_adler32.o.bc	adler32.o.bc	query
-function_310_adler32.o.bc	adler32.o.bc	query
-function_3a8_adler32.o.bc	adler32.o.bc	query

@@ -1,5 +1,5 @@
 import re
-
+import pdb
 class Normalizer:
   REGEX_SUBS = [
     {
@@ -16,7 +16,12 @@ class Normalizer:
       'regex': r".*=",
       'sub': 'result',
       'llvm_type': 'result'
-    }
+    },
+    {
+      'regex': r"\si[0-9]+\s",
+      'sub': " int_type ",
+      'llvm_type': "integer_type"
+    },
     # {
     #   'regex': r"[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*\(.*\)",
     #   'sub': 'func',
@@ -85,7 +90,23 @@ class Normalizer:
   def normalize(self, lines):
     normalized_lines = []
 
+    concat = False
+    multiline = None
     for line in lines:
+      if concat:
+        multiline += " " + line
+        
+        if line.endswith("]"):
+          concat = False
+          line = multiline
+        else:
+          continue
+
+      if line.endswith("["):
+        multiline = line
+        concat = True
+        continue
+
       for sub_string in self.REGEX_SUBS:
         line = re.sub(sub_string['regex'], sub_string['sub'], line)
       

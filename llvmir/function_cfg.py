@@ -28,7 +28,7 @@ class FunctionCFG:
       for successor in successors:
         # uses default dict val if self.blocks[block[0]] or self.blocks[successor] not initialized yet
         self.blocks[block[0]].add_successor(self.blocks[successor])
-      
+
       for inst in self.normalize_block_contents(block):
         parsed_instruction = parse_instruction(inst)
         self.blocks[block[0]].add_instruction(parsed_instruction)
