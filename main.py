@@ -12,35 +12,57 @@ logging.basicConfig(level=logging.DEBUG)
 DIM = 200
 
 irreader = IRReader()
-source_functions = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O3/libz/")
-query_functions = irreader.process_directory("llvm2vec_dataset/zlib/arm/zlib-O3/libz/")
+source_functions_O1 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O1/libz/")
+source_functions_O2 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O2/libz/")
+source_functions_O3 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O3/libz/")
+query_functions_O1 = irreader.process_directory("llvm2vec_dataset/zlib/arm/zlib-O1/libz/")
+query_functions_O2 = irreader.process_directory("llvm2vec_dataset/zlib/arm/zlib-O2/libz/")
+query_functions_O3 = irreader.process_directory("llvm2vec_dataset/zlib/arm/zlib-O3/libz/")
 
 # train model 
 print("Training model...")
 model = Asm2Vec(d=DIM)
-train_repo = model.make_function_repo(source_functions + query_functions)
+train_repo = model.make_function_repo(source_functions_O1 + source_functions_O2 + source_functions_O3)
 model.train(train_repo)
 
 source_function_vectors = {}
 print("Generating source function vectors...")
-for function in source_functions:
-  source_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':function._filename, 'role': 'source'}
+for function in source_functions_O1:
+  source_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O1_" + function._filename, 'role': 'source'}
+for function in source_functions_O2:
+  source_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O2_" + function._filename, 'role': 'source'}
+for function in source_functions_O3:
+  source_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O3_" + function._filename, 'role': 'source'}
 
 query_function_vectors = {}
 print("Generating query function vectors...")
-for function in query_functions:
-  query_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':function._filename, 'role': 'query'}
+for function in query_functions_O1:
+  query_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O1_" + function._filename, 'role': 'query'}
+for function in query_functions_O2:
+  query_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O2_" + function._filename, 'role': 'query'}
+for function in query_functions_O3:
+  query_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O3_" + function._filename, 'role': 'query'}
 
-
-for sfunc, value in source_function_vectors.items():
-  source_vec = value['vector']
-  print('=================================')
-  print(sfunc)
-  for qfunc, value in query_function_vectors.items():
-    target_vec = value['vector']
+f = open('cosine_sims.txt', 'w')
+# cosine similarity:
+# 1 = exactly the same
+# -1 = exactly opposite
+# 0 = orthoganal
+for qfunc, value in query_function_vectors.items():
+  target_vec = value['vector']
+  f.write('=================================\n')
+  f.write(qfunc + '\n')
+  sims = {}
+  for sfunc, value in source_function_vectors.items():
+    source_vec = value['vector']
     sim = model.cosine_similarity(source_vec, target_vec)
-    print(qfunc + ":" + str(sim))
+    sims[sfunc] = sim
+  
+  sims = dict(sorted(sims.items(), key=lambda item: item[1], reverse=True))
+  for key, value in sims.items():
+    f.write("\t" + key + ":" + str(value) + '\n')
 
+f.close()
 
 function_vectors = {**source_function_vectors, **query_function_vectors}
 max_size = len(function_vectors)

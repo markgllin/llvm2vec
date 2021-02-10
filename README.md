@@ -11,6 +11,12 @@ docker build . -t llvm2vec
 
 # start docker image with interactive shell
 docker run -it -v $PWD:/home llvm2vec /bin/bash
+
+# start nginx container to serve cfgs
+ docker run --name nginx \
+   -v $PWD/cfgs/:/www/data/ \
+   -v $PWD/nginx.conf:/etc/nginx/nginx.conf \
+   -p 8080:80 nginx
 ```
 *assumes you are currently in the root directory of the repo.
 

@@ -1,6 +1,7 @@
 import re
 import pdb
 class Normalizer:
+  # ORDER MATTERS
   REGEX_SUBS = [
     {
       'regex': r"c\".*\"",
@@ -18,19 +19,19 @@ class Normalizer:
       'llvm_type': 'result'
     },
     {
-      'regex': r"\si[0-9]+\s",
-      'sub': " int_type ",
+      'regex': r"[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*",
+      'sub': 'n_id',
+      'llvm_type': 'named_identifier'
+    },
+    {
+      'regex': r"i[0-9]+",
+      'sub': "int_type",
       'llvm_type': "integer_type"
     },
     # {
     #   'regex': r"[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*\(.*\)",
     #   'sub': 'func',
     #   'llvm_type': 'function'
-    # },
-    # {
-    #   'regex': r"[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*",
-    #   'sub': 'n_id',
-    #   'llvm_type': 'named_identifier'
     # },
     {
       'regex': r"[%@][0-9]+",
@@ -62,11 +63,11 @@ class Normalizer:
       'sub': 'm_data',
       'llvm_type': 'metadata'
     },
-    # {
-    #   'regex': r"\w+label[\w\.-]+:",
-    #   'sub': 'label',
-    #   'llvm_type': 'label'
-    # },
+    {
+      'regex': r"^\S+:$",
+      'sub': 'label_id',
+      'llvm_type': 'label_id'
+    },
     {
     'regex': r"({|}|,|\(|\)|\[|\])",
     'sub': '',
@@ -78,6 +79,9 @@ class Normalizer:
     'llvm_type': 'space'   
     }
   ]
+
+# attribute groups
+# begin with # (may need to inline)
 
   def __init__(self):
     self
