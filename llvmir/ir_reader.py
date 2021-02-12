@@ -4,7 +4,7 @@ from .function_cfg import FunctionCFG
 import os
 from os import listdir
 from os.path import isfile, join, basename
-import pdb
+
 class IRReader:
 
   def __init__(self):
@@ -41,8 +41,9 @@ class IRReader:
 
     for func, value in function_map.items():
       for callee in value['cfg']._identifiers:
-        if callee in function_map:
-          value['asm_function'].add_callee(function_map[callee + file_id]['asm_function'])
+        callee_id = callee + file_id
+        if callee_id in function_map:
+          value['asm_function'].add_callee(function_map[callee_id]['asm_function'])
     
     return function_map
 
