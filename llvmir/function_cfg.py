@@ -8,20 +8,25 @@ from collections import defaultdict
 from .normalizer import Normalizer
 from asm2vec.asm import BasicBlock, parse_instruction
 
+import pdb
 class FunctionCFG:
   IDENTIFIERS = "[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*"
   normalizer = Normalizer()
 
   def __init__(self, func):
     cfg = llvm.get_function_cfg(func, show_inst=True)
+    print(cfg)
 
     self._identifiers = []
     self._blocks = defaultdict(lambda: BasicBlock())
     self._graph = self.get_function_graph(cfg)
     self._dot_graph = self.get_dot_graph(cfg)
     self._name = self.get_function_name()
-    
+    self.generate_function_cfg()
+
+  def generate_function_cfg(self):
     for block in self._graph.nodes(data = True):
+      pdb.set_trace()
       successors = self.get_block_successors(block[0])
 
       for successor in successors:
@@ -70,6 +75,7 @@ class FunctionCFG:
 
     return identifiers
 
+  # parses dot format for basic block
   def strip_block(self, block):
     block_contents = []
 

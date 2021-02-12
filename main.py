@@ -31,7 +31,7 @@ for function,value in source_functions_O1.items():
 
 print("Generating query function vectors...")
 query_function_vectors = {}
-for function in query_functions_O3:
+for function,value in query_functions_O3.items():
   query_function_vectors[function + "_query"]={'vector': model.to_vec(value['asm_function']), 'filename':value['filename'], 'role': 'query'}
 
 f = open('cosine_sims.txt', 'w')
