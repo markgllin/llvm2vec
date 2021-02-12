@@ -1,0 +1,20 @@
+version: '3.5'
+
+services:
+  nginx-llvm2vec:
+    image: nginx:alpine
+    container_name: nginx-llvm2vec
+    ports:
+      - 8080:80
+    volumes:
+      - ./cfgs/:/www/data/
+      - ./nginx.conf:/etc/nginx/nginx.conf
+
+  llvm2vec:
+    image: llvm2vec
+    container_name: llvm2vec
+    ports:
+      - 6006:6006
+    volumes:
+      - ./:/home
+    command: python3 -m tensorboard.main --logdir=/home/projections/ --bind_all

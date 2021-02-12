@@ -6,42 +6,33 @@ from tensorboard.plugins import projector
 
 from llvmir.ir_reader import IRReader
 from asm2vec.model import Asm2Vec, Asm2VecMemento
+import pdb
 
 logging.basicConfig(level=logging.DEBUG)
 
 DIM = 200
 
 irreader = IRReader()
-source_functions_O1 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O1/libz/")
-source_functions_O2 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O2/libz/")
-source_functions_O3 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O3/libz/")
-query_functions_O1 = irreader.process_directory("llvm2vec_dataset/zlib/arm/zlib-O1/libz/")
-query_functions_O2 = irreader.process_directory("llvm2vec_dataset/zlib/arm/zlib-O2/libz/")
-query_functions_O3 = irreader.process_directory("llvm2vec_dataset/zlib/arm/zlib-O3/libz/")
+source_functions_O1 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O1/libz/", "source")
+query_functions_O3 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O3/libz/", "query")
 
 # train model 
 print("Training model...")
 model = Asm2Vec(d=DIM)
-train_repo = model.make_function_repo(source_functions_O1 + source_functions_O2 + source_functions_O3)
+
+function_repo = [ value['asm_function'] for function,value in source_functions_O1.items() ]
+train_repo = model.make_function_repo(function_repo)
 model.train(train_repo)
 
-source_function_vectors = {}
 print("Generating source function vectors...")
-for function in source_functions_O1:
-  source_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O1_" + function._filename, 'role': 'source'}
-for function in source_functions_O2:
-  source_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O2_" + function._filename, 'role': 'source'}
-for function in source_functions_O3:
-  source_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O3_" + function._filename, 'role': 'source'}
+source_function_vectors = {}
+for function,value in source_functions_O1.items():
+  source_function_vectors[function + "_source"]={'vector': model.to_vec(value['asm_function']), 'filename':value['filename'], 'role': 'source'}
 
-query_function_vectors = {}
 print("Generating query function vectors...")
-for function in query_functions_O1:
-  query_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O1_" + function._filename, 'role': 'query'}
-for function in query_functions_O2:
-  query_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O2_" + function._filename, 'role': 'query'}
+query_function_vectors = {}
 for function in query_functions_O3:
-  query_function_vectors[function._name]={'vector': model.to_vec(function), 'filename':"O3_" + function._filename, 'role': 'query'}
+  query_function_vectors[function + "_query"]={'vector': model.to_vec(value['asm_function']), 'filename':value['filename'], 'role': 'query'}
 
 f = open('cosine_sims.txt', 'w')
 # cosine similarity:

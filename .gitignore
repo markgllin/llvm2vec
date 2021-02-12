@@ -5,3 +5,5 @@
 **/llvm_binary_example
 projections/*
 cfgs/**
+cosine_sims.txt
+inst.txt

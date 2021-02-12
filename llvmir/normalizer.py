@@ -4,24 +4,19 @@ class Normalizer:
   # ORDER MATTERS
   REGEX_SUBS = [
     {
-      'regex': r"c\".*\"",
-      'sub': 'str',
-      'llvm_type': 'string'
+    'regex': r"(\(|\)|=)",
+    'sub': ' ',
+    'llvm_type': 'chars'
     },
+    # {
+    #   'regex': r"c\".*\"",
+    #   'sub': 'str',
+    #   'llvm_type': 'string'
+    # },
     {
       'regex': r";.*",
       'sub': '',
       'llvm_type': 'comment'
-    },
-    {
-      'regex': r".*=",
-      'sub': 'result',
-      'llvm_type': 'result'
-    },
-    {
-      'regex': r"[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*",
-      'sub': 'n_id',
-      'llvm_type': 'named_identifier'
     },
     {
       'regex': r"i[0-9]+",
@@ -38,16 +33,16 @@ class Normalizer:
       'sub': 'un_id',
       'llvm_type': 'unnamed_identifier'
     },
-    {
-      'regex': r"[-a-zA-Z0-9]+\*+",
-      'sub': 'ptr',
-      'llvm_type': 'pointer1'
-    },
-    {
-      'regex': r"\[\w+\sx\s\w+\]\*+",
-      'sub': 'ptr',
-      'llvm_type': 'pointer2'
-    },
+    # {
+    #   'regex': r"[-a-zA-Z0-9]+\*+",
+    #   'sub': 'ptr',
+    #   'llvm_type': 'pointer1'
+    # },
+    # {
+    #   'regex': r"\[\w+\sx\s\w+\]\*+",
+    #   'sub': 'ptr',
+    #   'llvm_type': 'pointer2'
+    # },
     {
       'regex': r"\s[-]*[0-9]+",
       'sub': ' cons',
@@ -59,7 +54,7 @@ class Normalizer:
       'llvm_type': 'constant2'
     },
     {
-      'regex': r"![0-9]+",
+      'regex': r"![a-z0-9]+",
       'sub': 'm_data',
       'llvm_type': 'metadata'
     },
