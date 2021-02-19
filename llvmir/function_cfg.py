@@ -1,4 +1,3 @@
-import llvmlite.binding as llvm
 import pygraphviz
 import pydot
 import re
@@ -11,95 +10,111 @@ from asm2vec.asm import BasicBlock, parse_instruction
 import pdb
 class FunctionCFG:
   IDENTIFIERS = "[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*"
+  INLINE_ALPHA_THRESHOLD = 0.01
+  INLINE_LEN_MIN = 10
+  INLINE_LEN_THRESHOLD = 0.6
   normalizer = Normalizer()
 
-  def __init__(self, func):
-    cfg = llvm.get_function_cfg(func, show_inst=True)
-    print(cfg)
+  def __init__(self, function_name, cfg_map, caller = True):
+    self._cfg = cfg_map[function_name]['cfg']
+    self._graph = self.get_function_graph()
+    self._name = function_name
+    self._length = self.function_len()
+    self._blocks = self.generate_function_cfg(cfg_map, caller)
 
-    self._identifiers = []
-    self._blocks = defaultdict(lambda: BasicBlock())
-    self._graph = self.get_function_graph(cfg)
-    self._dot_graph = self.get_dot_graph(cfg)
-    self._name = self.get_function_name()
-    self.generate_function_cfg()
-
-  def generate_function_cfg(self):
+  def generate_function_cfg(self, cfg_map, caller = True):
+    blocks = defaultdict(lambda: BasicBlock())
+    
     for block in self._graph.nodes(data = True):
-      pdb.set_trace()
-      successors = self.get_block_successors(block[0])
+      node_id = block[0]
+      normalized_contents = self.normalizer.normalize(block)
+      successors = self.get_block_successors(node_id)
+
+      for i, inst in enumerate(normalized_contents):
+        callee_function_name = self.check_identifiers(inst)
+
+        if caller and callee_function_name and callee_function_name in cfg_map:
+          callee = FunctionCFG(callee_function_name, cfg_map, caller = False)
+
+          
+          if callee.root() and self.inline_callee(callee, cfg_map):
+            blocks[node_id].add_successor(callee.root())
+            node_id = node_id + '_' + str(i)
+            callee.tail().add_successor(blocks[node_id])
+          else:
+            parsed_instruction = parse_instruction(inst)
+            blocks[node_id].add_instruction(parsed_instruction)
+        else:
+          parsed_instruction = parse_instruction(inst)
+          blocks[node_id].add_instruction(parsed_instruction)
 
       for successor in successors:
-        # uses default dict val if self.blocks[block[0]] or self.blocks[successor] not initialized yet
-        self._blocks[block[0]].add_successor(self._blocks[successor])
-
-      stripped_block = self.strip_block(block)
-      self._identifiers += self.get_block_identifiers(stripped_block)
-      normalized_contents = self.normalizer.normalize(stripped_block)
-
-      # print(normalized_contents)
-      # print(self._identifiers)
-
-      for inst in normalized_contents:
-        parsed_instruction = parse_instruction(inst)
-        self._blocks[block[0]].add_instruction(parsed_instruction)
+        # uses default dict val if self.blocks[node_id] or self.blocks[successor] not initialized yet
+        blocks[node_id].add_successor(blocks[successor])
+      
+    return blocks
 
   def root(self):
+    if not self._blocks:
+      return None
+    else:
+      for block in self._blocks.values():
+        if not block._predecessors:
+          return block
+
     return self._blocks[next(iter(self._blocks))] if self._blocks else None
 
-  def generate_pngs(self, filepath):
-    print("\tGenerating cfg for " + self._name)
-    self._dot_graph.write_png(filepath + self._name + '.png')
+  def tail(self):
+    if not self._blocks:
+      return None
+    else:
+      for block in self._blocks.values():
+        if not block._successors:
+          return block
 
   def get_block_successors(self, block):
     # edge[0] = start node, edge[1] = destination node
     return [edge[1] for edge in self._graph.out_edges(block)]
 
-  def get_function_name(self):
-    return re.search("CFG for \'(.+?)\' function", self._dot_graph.get_label()).group(1)
+  def get_function_graph(self):
+    return nx_agraph.from_agraph(pygraphviz.AGraph(self._cfg))
 
-  def get_function_graph(self, cfg):
-    return nx_agraph.from_agraph(pygraphviz.AGraph(cfg))
+  def check_identifiers(self, inst):
+    identifier = re.search(self.IDENTIFIERS, inst)
 
-  def get_dot_graph(self, cfg):
-    (graph,) = pydot.graph_from_dot_data(cfg)
-    return graph
+    if identifier:
+      return identifier.group(0)[1:]
+    
+    return None
 
-  def get_block_identifiers(self, block):
-    identifiers = []
+  def generate_pngs(self, filepath):
 
-    for inst in block:
-      identifier = re.search(self.IDENTIFIERS, inst)
-      if identifier:
-        identifiers.append(identifier.group(0)[1:])
+    def get_dot_graph(cfg):
+      (graph,) = pydot.graph_from_dot_data(cfg)
+      return graph
 
-    return identifiers
+    print("\tGenerating cfg for " + self._name)
+    graph = get_dot_graph(self._cfg)
+    graph.write_png(filepath + self._name + '.png')   
 
-  # parses dot format for basic block
-  def strip_block(self, block):
-    block_contents = []
+  def function_len(self):
+    length = 0
 
-    for line in block[1]["label"].split('\l'):
-      line = line.strip()
+    for block in self._graph.nodes(data = True):
+      normalized_contents = self.normalizer.normalize(block)
+      length += len(normalized_contents)
 
-      if line.startswith("..."):
-        block_contents[-1] += line[3:]
-      else:
-        block_contents.append(line)
+    return length
 
-    # remove closing brace from list
-    if block_contents[-1] == '}':
-      del block_contents[-1]
-    # remove conditional statements from list
-    elif block_contents[-1][0] == '|':
-      del block_contents[-1]
+  def inline_callee(self, callee, cfg_map):
+    if (self._length < self.INLINE_LEN_MIN) or ((callee._length/self._length) < self.INLINE_LEN_THRESHOLD):
+      return True
+    
+    in_degree = cfg_map[callee._name]['in_degree']
+    out_degree = cfg_map[callee._name]['out_degree']
+    alpha = out_degree/(in_degree + out_degree)
 
-    # remove opening label from list
-    if block_contents[0][-1] == ':':
-      del block_contents[0]
+    if alpha > self.INLINE_ALPHA_THRESHOLD:
+      return True
 
-    # remove opening label from list
-    if block_contents[-1] == '}':
-      del block_contents[-1]
-
-    return block_contents
+    return False

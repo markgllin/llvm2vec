@@ -10,11 +10,18 @@ services:
       - ./cfgs/:/www/data/
       - ./nginx.conf:/etc/nginx/nginx.conf
 
-  llvm2vec:
+  tensorboard:
     image: llvm2vec
-    container_name: llvm2vec
+    container_name: tensorboard
     ports:
       - 6006:6006
     volumes:
       - ./:/home
     command: python3 -m tensorboard.main --logdir=/home/projections/ --bind_all
+
+  llvm2vec:
+    image: llvm2vec
+    container_name: llvm2vec
+    volumes:
+      - ./:/home
+    command: tail -f /dev/null

@@ -6,7 +6,6 @@ from tensorboard.plugins import projector
 
 from llvmir.ir_reader import IRReader
 from asm2vec.model import Asm2Vec, Asm2VecMemento
-import pdb
 
 logging.basicConfig(level=logging.DEBUG)
 

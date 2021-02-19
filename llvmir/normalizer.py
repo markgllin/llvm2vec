@@ -1,5 +1,5 @@
 import re
-import pdb
+
 class Normalizer:
   # ORDER MATTERS
   REGEX_SUBS = [
@@ -81,7 +81,37 @@ class Normalizer:
   def __init__(self):
     self
 
-  def normalize(self, lines):
+  def normalize(self, block):
+    # parses dot format for basic block
+    def strip_block(block):
+      block_contents = []
+
+      for line in block[1]["label"].split('\l'):
+        line = line.strip()
+
+        if line.startswith("..."):
+          block_contents[-1] += line[3:]
+        else:
+          block_contents.append(line)
+
+      # remove closing brace from list
+      if block_contents[-1] == '}':
+        del block_contents[-1]
+      # remove conditional statements from list
+      elif block_contents[-1][0] == '|':
+        del block_contents[-1]
+
+      # remove opening label from list
+      if block_contents[0][-1] == ':':
+        del block_contents[0]
+
+      # remove opening label from list
+      if block_contents[-1] == '}':
+        del block_contents[-1]
+
+      return block_contents    
+
+    lines = strip_block(block)
     normalized_lines = []
 
     concat = False
