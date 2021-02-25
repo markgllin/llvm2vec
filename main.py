@@ -13,7 +13,7 @@ DIM = 200
 
 irreader = IRReader()
 source_functions_O1 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O1/libz/", "source")
-query_functions_O3 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O3/libz/", "query")
+query_functions_O3 = irreader.process_directory("llvm2vec_dataset/zlib/llvmir/zlib-O1/libz/", "query")
 
 # train model 
 print("Training model...")

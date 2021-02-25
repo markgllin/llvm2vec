@@ -6,8 +6,8 @@ from networkx.drawing import nx_agraph
 from collections import defaultdict
 from .normalizer import Normalizer
 from asm2vec.asm import BasicBlock, parse_instruction
-
 import pdb
+
 class FunctionCFG:
   IDENTIFIERS = "[%@][-a-zA-Z$._][-a-zA-Z$._0-9]*"
   INLINE_ALPHA_THRESHOLD = 0.01
@@ -21,6 +21,7 @@ class FunctionCFG:
     self._name = function_name
     self._length = self.function_len()
     self._blocks = self.generate_function_cfg(cfg_map, caller)
+    self._inlined_cfg = self.generate_inlined_cfg()
 
   def generate_function_cfg(self, cfg_map, caller = True):
     blocks = defaultdict(lambda: BasicBlock())
@@ -87,15 +88,18 @@ class FunctionCFG:
     
     return None
 
-  def generate_pngs(self, filepath):
+  def get_dot_graph(self, cfg):
+    (graph,) = pydot.graph_from_dot_data(cfg)
+    return graph
 
-    def get_dot_graph(cfg):
-      (graph,) = pydot.graph_from_dot_data(cfg)
-      return graph
-
+  def generate_png(self, filepath):
     print("\tGenerating cfg for " + self._name)
-    graph = get_dot_graph(self._cfg)
+    graph = self.get_dot_graph(self._cfg)
     graph.write_png(filepath + self._name + '.png')   
+
+  def generate_inlined_png(self, filepath):
+    print("\tGenerating inlined cfg for " + self._name)
+    self._inlined_cfg.write_png(filepath + self._name + '_inlined.png')
 
   def function_len(self):
     length = 0
@@ -118,3 +122,28 @@ class FunctionCFG:
       return True
 
     return False
+
+  def generate_inlined_cfg(self):
+    graph = pydot.Dot(self._name, graph_type='digraph')
+    return self.generate_cfg_nodes(graph, self.root())
+
+  def generate_cfg_nodes(self, graph, block):
+    if block == None: return graph 
+
+    node_label = ''
+
+    for inst in block._instructions:
+      node_label += inst._op + ' ' + ' '.join(inst._args) + '\n'
+      
+    print(node_label)
+    node = pydot.Node(block._id, label=node_label, shape='record')
+    graph.add_node(node)
+
+    for successor in block._successors:
+      edge = pydot.Edge(block._id, successor._id)
+      graph.add_edge(edge)
+
+      if str(successor._id) not in graph.obj_dict['nodes'].keys():
+        graph = self.generate_cfg_nodes(graph, successor)
+
+    return graph

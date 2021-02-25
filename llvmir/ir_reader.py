@@ -5,7 +5,7 @@ from .function_inliner import get_cfg, get_cfg_map, get_in_degree_from_map
 import os
 from os import listdir
 from os.path import isfile, join, basename
-
+import pdb
 class IRReader:
 
   def __init__(self):
@@ -38,12 +38,13 @@ class IRReader:
 
     for function in cfg_map:
       cfg_func = FunctionCFG(function, cfg_map)
-      cfg_func.generate_pngs(cfg_path)
-
+      
       if cfg_func._blocks:
+        cfg_func.generate_png(cfg_path)
+        cfg_func.generate_inlined_png(cfg_path)
         asm_function = Function(cfg_func.root(), name = cfg_func._name)
         function_map[cfg_func._name + file_id] = {'asm_function': asm_function, 'cfg': cfg_func, 'filename': file_id}
-    
+
     return function_map
 
 

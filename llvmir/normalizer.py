@@ -8,11 +8,11 @@ class Normalizer:
     'sub': ' ',
     'llvm_type': 'chars'
     },
-    # {
-    #   'regex': r"c\".*\"",
-    #   'sub': 'str',
-    #   'llvm_type': 'string'
-    # },
+    {
+      'regex': r"c\".*\"",
+      'sub': 'str',
+      'llvm_type': 'string'
+    },
     {
       'regex': r";.*",
       'sub': '',
@@ -60,7 +60,7 @@ class Normalizer:
     },
     {
       'regex': r"^\S+:$",
-      'sub': 'label_id',
+      'sub': 'label un_id',
       'llvm_type': 'label_id'
     },
     {
@@ -75,6 +75,7 @@ class Normalizer:
     }
   ]
 
+  LABEL_ID = r"^\S+:$"
 # attribute groups
 # begin with # (may need to inline)
 
@@ -126,6 +127,9 @@ class Normalizer:
         else:
           continue
 
+      if re.match(self.LABEL_ID, line):
+        line = line[0:-1]
+      
       if line.endswith("["):
         multiline = line
         concat = True
