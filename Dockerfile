@@ -8,7 +8,7 @@ RUN apt-get update && \
     apt install python3.8 python3-pip libgraphviz-dev graphviz -y
 RUN pip3 install llvmlite networkx numpy sklearn seaborn matplotlib tensorflow pydot
 # RUN pip3 install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/x86_64-linux-gnu/graphviz" 
-RUN pip3 install pygraphviz
+RUN pip3 install pygraphviz click
 
 
 EXPOSE 6006

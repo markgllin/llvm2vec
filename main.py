@@ -22,6 +22,7 @@ model = Asm2Vec(d=DIM)
 function_repo = [ value['asm_function'] for function,value in source_functions_O1.items() ]
 train_repo = model.make_function_repo(function_repo)
 model.train(train_repo)
+model.memento().save_to_disk()
 
 print("Generating source function vectors...")
 source_function_vectors = {}

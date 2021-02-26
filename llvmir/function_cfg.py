@@ -135,7 +135,6 @@ class FunctionCFG:
     for inst in block._instructions:
       node_label += inst._op + ' ' + ' '.join(inst._args) + '\n'
       
-    print(node_label)
     node = pydot.Node(block._id, label=node_label, shape='record')
     graph.add_node(node)
 
